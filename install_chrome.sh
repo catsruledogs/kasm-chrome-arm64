@@ -1,4 +1,4 @@
-```bash
+bash
 #!/usr/bin/env bash
 set -ex
 
@@ -263,4 +263,3 @@ EOL
 chown -R 1000:0 "$HOME"
 
 find /usr/share/ -name "icon-theme.cache" -exec rm -f {} \;
-```
