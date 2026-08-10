@@ -82,26 +82,3 @@ jobs:
 
           docker buildx imagetools inspect \
             ghcr.io/${{ github.repository_owner }}/kasm-chrome-arm64:latest
-
-  cleanup:
-    name: Clean up old workflow runs
-    needs: build
-    if: always()
-    runs-on: ubuntu-latest
-
-    permissions:
-      actions: write
-
-    steps:
-      - name: Delete old workflow runs
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh run list \
-            --workflow build.yml \
-            --limit 100 \
-            --json databaseId \
-            --jq '.[1:] | .[].databaseId' |
-          while read run_id; do
-            gh run delete "$run_id" --confirm
-          done
