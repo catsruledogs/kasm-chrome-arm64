@@ -1,0 +1,116 @@
+name: Build Kasm Chrome ARM64
+
+on:
+workflow_dispatch:
+
+# Build every Sunday at 04:00 UTC
+
+schedule:
+- cron: "0 4 * * 0"
+
+push:
+branches:
+- main
+
+permissions:
+contents: read
+packages: write
+
+jobs:
+build:
+name: Build and publish Kasm Chrome ARM64
+runs-on: ubuntu-24.04-arm
+timeout-minutes: 60
+
+```
+steps:
+  # ------------------------------------------------
+  # Checkout our repository
+  # ------------------------------------------------
+  - name: Checkout repository
+    uses: actions/checkout@v6
+
+  # ------------------------------------------------
+  # Confirm that this is actually ARM64
+  # ------------------------------------------------
+  - name: Check architecture
+    run: |
+      uname -m
+      dpkg --print-architecture
+
+  # ------------------------------------------------
+  # Download the current Kasm workspaces source
+  # ------------------------------------------------
+  - name: Download Kasm workspaces-images
+    run: |
+      git clone \
+        --depth 1 \
+        https://github.com/kasmtech/workspaces-images.git \
+        kasm-source
+
+  # ------------------------------------------------
+  # Replace Kasm's Chrome installer/startup files
+  # with our ARM64-compatible versions
+  # ------------------------------------------------
+  - name: Prepare Kasm build context
+    run: |
+      set -eux
+
+      cp Dockerfile \
+        kasm-source/dockerfile-kasm-chrome
+
+      cp install_chrome.sh \
+        kasm-source/src/ubuntu/install/chrome/install_chrome.sh
+
+      cp custom_startup.sh \
+        kasm-source/src/ubuntu/install/chrome/custom_startup.sh
+
+      echo "Prepared build context:"
+      ls -lah kasm-source
+      ls -lah kasm-source/src/ubuntu/install/chrome/
+
+  # ------------------------------------------------
+  # Log into GitHub Container Registry
+  # ------------------------------------------------
+  - name: Log in to GHCR
+    uses: docker/login-action@v3
+    with:
+      registry: ghcr.io
+      username: ${{ github.actor }}
+      password: ${{ secrets.GITHUB_TOKEN }}
+
+  # ------------------------------------------------
+  # Enable Docker Buildx
+  # ------------------------------------------------
+  - name: Set up Docker Buildx
+    uses: docker/setup-buildx-action@v3
+
+  # ------------------------------------------------
+  # Build and publish
+  # ------------------------------------------------
+  - name: Build and push Docker image
+    uses: docker/build-push-action@v7
+    with:
+      context: ./kasm-source
+      file: ./kasm-source/dockerfile-kasm-chrome
+
+      push: true
+
+      tags: |
+        ghcr.io/${{ github.repository_owner }}/kasm-chrome-arm64:latest
+        ghcr.io/${{ github.repository_owner }}/kasm-chrome-arm64:${{ github.sha }}
+
+      cache-from: type=gha
+      cache-to: type=gha,mode=max
+
+  # ------------------------------------------------
+  # Verify the published image
+  # ------------------------------------------------
+  - name: Verify image
+    run: |
+      echo "Published image:"
+      echo "ghcr.io/${{ github.repository_owner }}/kasm-chrome-arm64:latest"
+
+      docker buildx imagetools inspect \
+        ghcr.io/${{ github.repository_owner }}/kasm-chrome-arm64:latest
+```
