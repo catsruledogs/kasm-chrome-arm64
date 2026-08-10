@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-CHROMIUM_ARGS="--password-store=basic --no-sandbox --ignore-gpu-blocklist --user-data-dir --no-first-run --disable-search-engine-choice-screen --simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'"
+CHROMIUM_ARGS="--password-store=basic --no-sandbox --ignore-gpu-blocklist --user-data-dir --no-first-run --disable-search-engine-choice-screen'"
 
 echo "========================================"
 echo "Installing ARM64 Chromium"
