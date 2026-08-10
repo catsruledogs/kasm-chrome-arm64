@@ -10,43 +10,40 @@ WORKDIR $HOME
 
 ######### Customize Container Here ###########
 
-Install Google Chrome
 
+# Install Google Chrome
 COPY ./src/ubuntu/install/chrome $INST_SCRIPTS/chrome/
-RUN bash $INST_SCRIPTS/chrome/install_chrome.sh && rm -rf $INST_SCRIPTS/chrome/
+RUN bash $INST_SCRIPTS/chrome/install_chrome.sh  && rm -rf $INST_SCRIPTS/chrome/
 
-Install unzip
-
+# Install unzip
 RUN apt-get update && apt-get install -y unzip
 
-Update the desktop environment to be optimized for a single application
-
+# Update the desktop environment to be optimized for a single application
 RUN cp $HOME/.config/xfce4/xfconf/single-application-xfce-perchannel-xml/* $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/
 RUN cp /usr/share/backgrounds/bg_kasm.png /usr/share/backgrounds/bg_default.png
 RUN apt-get remove -y xfce4-panel
 
-Security modifications
-
+# Security modifications
 COPY ./src/ubuntu/install/misc/single_app_security.sh $INST_SCRIPTS/misc/
-RUN bash $INST_SCRIPTS/misc/single_app_security.sh -t && rm -rf $INST_SCRIPTS/misc/
+RUN  bash $INST_SCRIPTS/misc/single_app_security.sh -t && rm -rf $INST_SCRIPTS/misc/
 COPY ./src/common/chrome-managed-policies/urlblocklist.json /etc/opt/chrome/policies/managed/urlblocklist.json
 
-Setup the custom startup script that will be invoked when the container starts
-
-#ENV LAUNCH_URL http://kasmweb.com
+# Setup the custom startup script that will be invoked when the container starts
+#ENV LAUNCH_URL  http://kasmweb.com
 
 COPY ./src/ubuntu/install/chrome/custom_startup.sh $STARTUPDIR/custom_startup.sh
 RUN chmod +x $STARTUPDIR/custom_startup.sh
 
-Install Custom Certificate Authority
-COPY ./src/ubuntu/install/certificates $INST_SCRIPTS/certificates/
-RUN bash $INST_SCRIPTS/certificates/install_ca_cert.sh && rm -rf $INST_SCRIPTS/certificates/
+# Install Custom Certificate Authority
+# COPY ./src/ubuntu/install/certificates $INST_SCRIPTS/certificates/
+# RUN bash $INST_SCRIPTS/certificates/install_ca_cert.sh && rm -rf $INST_SCRIPTS/certificates/
 
 ENV KASM_RESTRICTED_FILE_CHOOSER=1
 COPY ./src/ubuntu/install/gtk/ $INST_SCRIPTS/gtk/
 RUN bash $INST_SCRIPTS/gtk/install_restricted_file_chooser.sh
 COPY ./src/ubuntu/install/close_browser_breakout_via_file_manager/ $INST_SCRIPTS/close_browser_breakout_via_file_manager/
 RUN bash $INST_SCRIPTS/close_browser_breakout_via_file_manager/replace_thunar_with_empty_script.sh
+
 
 ######### End Customizations ###########
 
