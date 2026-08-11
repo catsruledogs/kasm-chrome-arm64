@@ -145,7 +145,7 @@ mv /usr/bin/google-chrome /usr/bin/google-chrome-orig
 cat >/usr/bin/google-chrome <<'EOL'
 #!/usr/bin/env bash
 
-CHROME_ARGS="--password-store=basic --no-sandbox --ignore-gpu-blocklist --user-data-dir --no-first-run --disable-search-engine-choice-screen --simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'"
+CHROME_ARGS="--password-store=basic --no-sandbox --ignore-gpu-blocklist --user-data-dir --no-first-run --disable-search-engine-choice-screen'"
 
 supports_vulkan() {
 
